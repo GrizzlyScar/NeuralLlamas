@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Playlist - NPC</title>
+    <script>
+        // Function to send the current song ID to the server
+        function logCurrentSong(songId) {
+            fetch('/log_song', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ song_id: songId })
+            }).then(response => {
+                if (!response.ok) {
+                    console.error('Failed to log song:', response.statusText);
+                } else {
+                    console.log(`Logged song ID: ${songId}`);
+                }
+            }).catch(error => {
+                console.error('Error logging song:', error);
+            });
+        }
+
+        // Play the iframe when the button is clicked
+        function playSong(songId, iframeId) {
+            logCurrentSong(songId);
+            const iframe = document.getElementById(iframeId);
+            iframe.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</head>
+<body>
+    <h1>Playlist: {{ playlist_name }}</h1>
+    <ul>
+        {% for track in tracks %}
+            <li>
+                <strong>{{ track.name }}</strong> by {{ track.artist }}
+                <br>
+                <iframe 
+                    id="iframe-{{ loop.index }}" 
+                    src="{{ track.embed_url }}" 
+                    class="spotify-embed"
+                    width="300" 
+                    height="80" 
+                    frameborder="0" 
+                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture">
+                </iframe>
+                <br>
+                <button onclick="playSong('{{ track.embed_url.split('/')[-1] }}', 'iframe-{{ loop.index }}')">
+                    Play
+                </button>
+            </li>
+            <br>
+        {% endfor %}
+    </ul>
+</body>
+</html>
