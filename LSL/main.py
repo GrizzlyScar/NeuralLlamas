@@ -15,6 +15,11 @@ from pylsl import StreamInlet, resolve_byprop
 import utils
 import time
 
+
+from websocket_server import WebsocketServer
+import threading
+import json
+
 # Handy little enum to make code more readable
 class Band:
     Delta = 0
@@ -41,7 +46,43 @@ SHIFT_LENGTH = EPOCH_LENGTH - OVERLAP_LENGTH
 # Index of the channel(s) (electrodes) to be used
 INDEX_CHANNEL = [0]
 
+
+
+# WebSocket server settings
+HOST = 'localhost'
+PORT = 8765
+
+# List to keep track of connected clients
+clients = []
+
+def new_client(client, server):
+    print(f"New client connected: {client['id']}")
+    clients.append(client)
+
+def client_left(client, server):
+    print(f"Client disconnected: {client['id']}")
+    clients.remove(client)
+
+def send_eeg_data(data):
+    # Convert the data dictionary to JSON string
+    message = json.dumps(data)
+    # Send the message to all connected clients
+    server.send_message_to_all(message)
+
+def run_websocket_server():
+    global server
+    server = WebsocketServer(host=HOST, port=PORT)
+    server.set_fn_new_client(new_client)
+    server.set_fn_client_left(client_left)
+    print(f"WebSocket server started on ws://{HOST}:{PORT}")
+    server.run_forever()
+
 if __name__ == "__main__":
+
+    # Start WebSocket server in a separate thread
+    ws_thread = threading.Thread(target=run_websocket_server)
+    ws_thread.daemon = True
+    ws_thread.start()
 
     """ 1. CONNECT TO EEG STREAM """
 
@@ -152,14 +193,30 @@ if __name__ == "__main__":
 
             """ 3.3 COMPUTE CONCENTRATION VALUE """
             # Calculate concentration value
-            concentration_value = smooth_band_powers[Band.Beta] / \
-                smooth_band_powers[Band.Gamma]
-            print('Concentration Value (Beta/Theta): ', concentration_value)
-
-            # Calculate concentration value
             # concentration_value = smooth_band_powers[Band.Alpha] / \
             #     smooth_band_powers[Band.Beta]
-            # print('Concentration Value (Alpha/Beta): ', concentration_value)
+            # print('Concentration Value (Beta/Theta): ', concentration_value)
+
+            # concentration_value = beta_metric
+
+
+
+            #Calculate concentration value
+            concentration_value = smooth_band_powers[Band.Alpha] / \
+                smooth_band_powers[Band.Beta]
+            print('Concentration Value (Alpha/Beta): ', concentration_value)
+
+
+            """ 3.4 SEND DATA VIA WEBSOCKET """
+            eeg_data_dict = {
+                "alpha": smooth_band_powers[Band.Alpha],
+                "beta": band_powers[Band.Theta],
+                "theta": band_powers[Band.Theta],
+                "delta":band_powers[Band.Delta],
+                "gamma":band_powers[Band.Gamma],
+                "concentration": concentration_value
+            }
+            send_eeg_data(eeg_data_dict)
 
             """ 3.4 UPDATE REAL-TIME PLOTS """
             current_time = time.time() - t0
