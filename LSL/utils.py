@@ -108,6 +108,11 @@ def compute_band_powers(eegdata, fs):
 
     feature_vector = np.log10(feature_vector)
 
+    # Normalize the feature vector to [0, 1]
+    min_val = np.min(feature_vector)
+    max_val = np.max(feature_vector)
+    feature_vector = (feature_vector - min_val) / (max_val - min_val)
+
     return feature_vector
 
 

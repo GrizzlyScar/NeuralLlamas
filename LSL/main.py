@@ -152,25 +152,40 @@ if __name__ == "__main__":
 
             """ 3.3 COMPUTE CONCENTRATION VALUE """
             # Calculate concentration value
-            concentration_value = smooth_band_powers[Band.Beta] / \
-                smooth_band_powers[Band.Gamma]
-            print('Concentration Value (Beta/Theta): ', concentration_value)
-
-            # Calculate concentration value
             # concentration_value = smooth_band_powers[Band.Alpha] / \
             #     smooth_band_powers[Band.Beta]
-            # print('Concentration Value (Alpha/Beta): ', concentration_value)
+            # print('Concentration Value (Beta/Theta): ', concentration_value)
+
+            # Calculate concentration value
+            concentration_value = smooth_band_powers[Band.Alpha] / smooth_band_powers[Band.Beta]
+
+            # Normalize using the sigmoid function
+            scaling_factor = 1.0  # Adjust based on the expected range of the ratio
+            normalized_concentration_value = 1 / (1 + np.exp(-scaling_factor * (concentration_value - 1)))
+
+            print('Concentration Value (Sigmoid): ', normalized_concentration_value)
+
+
+            """ 3.5 OPTIONAL: APPLY SMOOTHING OR NORMALIZATION """
+            # If desired, you can apply smoothing to the concentration value
+            # For example, using a moving average
+            # window_size = 5
+            # if len(concentration_values) >= window_size:
+            #     smoothed_concentration = np.convolve(concentration_values, np.ones(window_size)/window_size, mode='valid')
+            #     # Update the plot accordingly
+            # concentration_value = smoothed_concentration
+            # print('Smoothed Concentration: ', concentration_value)
 
             """ 3.4 UPDATE REAL-TIME PLOTS """
             current_time = time.time() - t0
 
             times.append(current_time)
-            delta_powers.append(band_powers[Band.Delta])
-            theta_powers.append(band_powers[Band.Theta])
-            alpha_powers.append(band_powers[Band.Alpha])
-            beta_powers.append(band_powers[Band.Beta])
-            gamma_powers.append(band_powers[Band.Gamma])
-            concentration_values.append(concentration_value)
+            delta_powers.append(smooth_band_powers[Band.Delta])
+            theta_powers.append(smooth_band_powers[Band.Theta])
+            alpha_powers.append(smooth_band_powers[Band.Alpha])
+            beta_powers.append(smooth_band_powers[Band.Beta])
+            gamma_powers.append(smooth_band_powers[Band.Gamma])
+            concentration_values.append(normalized_concentration_value)
 
             # Limit the x-axis to show only the last 30 seconds
             time_window = 30
@@ -249,14 +264,14 @@ if __name__ == "__main__":
                         transform=axs[4].transAxes, fontsize=12, verticalalignment='top',
                         bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
 
-            # Plot concentration value
+            # Update the plot with normalized concentration
             axs[5].cla()
-            axs[5].plot(times[idx_min:], concentration_values[idx_min:], label='Concentration', color='k')
-            axs[5].set_ylabel('Concentration')
+            axs[5].plot(times[idx_min:], concentration_values[idx_min:], label='Concentration (Normalized)', color='k')
+            axs[5].set_ylabel('Normalized Concentration')
             axs[5].set_xlim([xmin, xmax])
             axs[5].legend(loc='upper right')
             axs[5].set_xlabel('Time (s)')
-            axs[5].set_title('Concentration (Alpha/Beta Ratio)')
+            axs[5].set_title('Normalized Concentration (Alpha/Beta Ratio)')
 
             # Add text displaying the current concentration value
             current_concentration = concentration_values[-1]
@@ -266,15 +281,6 @@ if __name__ == "__main__":
 
             plt.tight_layout()
             plt.pause(0.01)
-
-            """ 3.5 OPTIONAL: APPLY SMOOTHING OR NORMALIZATION """
-            # If desired, you can apply smoothing to the concentration value
-            # For example, using a moving average
-            # window_size = 5
-            # if len(concentration_values) >= window_size:
-            #     smoothed_concentration = np.convolve(concentration_values, np.ones(window_size)/window_size, mode='valid')
-            #     # Update the plot accordingly
-            # print('Smoothed Concentration: ', smoothed_concentration)
 
         # The above code continues in the loop
 
