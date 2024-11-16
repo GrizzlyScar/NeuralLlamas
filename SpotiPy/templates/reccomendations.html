@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recommendations</title>
+</head>
+<body>
+    <h1>Song Recommendations</h1>
+    <ul>
+        {% for recommendation in recommendations %}
+            <li>
+                <strong>{{ recommendation.name }}</strong> by {{ recommendation.artist }}
+                <br>
+                <iframe 
+                    id="iframe-{{ loop.index }}" 
+                    src="{{ recommendation.preview_url }}?enable-spotify-embed=true" 
+                    data-uri="spotify:track:{{ recommendation.preview_url.split('/')[-1].split('?')[0] }}"
+                    songID="{{recommendation.songid}}"
+                    class="spotify-embed"
+                    width="300" 
+                    height="80" 
+                    frameborder="0" 
+                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture">
+                </iframe>
+                <br>
+            </li>
+            <br>
+        {% endfor %}
+    </ul>
+</body>
+</html>
