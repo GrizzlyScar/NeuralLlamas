@@ -4,6 +4,7 @@ from spotipy.oauth2 import SpotifyOAuth
 from dotenv import load_dotenv
 import os
 import json
+import secret
 
 # Load environment variables
 load_dotenv()
@@ -13,9 +14,9 @@ app.secret_key = os.urandom(24)
 
 # Configure Spotipy OAuth with necessary scopes
 sp_oauth = SpotifyOAuth(
-    client_id=os.getenv("SPOTIFY_CLIENT_ID"),
-    client_secret=os.getenv("SPOTIFY_CLIENT_SECRET"),
-    redirect_uri=os.getenv("REDIRECT_URI"),
+    client_id=secret.client_id,
+    client_secret=secret.client_secret,
+    redirect_uri=secret.redirect_uri, 
     scope="playlist-read-private user-read-email"
 )
 
@@ -29,37 +30,19 @@ def login():
 @app.route('/callback')
 def callback():
     code = request.args.get('code')
-    token_info = sp_oauth.get_access_token(code)
+    # token_info = sp_oauth.get_access_token(code)
+    try:
+        token_info = sp_oauth.get_access_token(code)
+    except Exception as e:
+        print(f"Error fetching access token: {e}")
+        return "Authentication failed", 400
+
     
     if token_info:
         session['access_token'] = token_info['access_token']
         return redirect(url_for('embed'))
     else:
         return "Authentication failed", 400
-
-# Step 3: Display "NPC" playlist as an embedded Spotify player
-# @app.route('/embed')
-# def embed():
-#     if 'access_token' in session:
-#         # Initialize Spotify client with the access token
-#         sp = Spotify(auth=session['access_token'])
-        
-#         # Fetch the user's playlists and find the playlist named "NPC"
-#         playlists = sp.current_user_playlists(limit=50)
-#         npc_playlist = None
-#         for playlist in playlists['items']:
-#             if playlist['name'].lower() == "npc":
-#                 npc_playlist = playlist
-#                 break
-
-#         # If the playlist is found, pass the playlist ID to the template to embed it
-#         if npc_playlist:
-#             playlist_id = npc_playlist['id']
-#             return render_template("playlist_embed.html", playlist_id=playlist_id)
-#         else:
-#             return "Playlist 'NPC' not found", 404
-#     else:
-#         return redirect(url_for('login'))
 
 @app.route('/embed')
 def embed():
@@ -83,6 +66,7 @@ def embed():
                 {
                     "name": track['track']['name'],
                     "artist": track['track']['artists'][0]['name'],
+                    "songid": track['track']['id'],
                     "embed_url": f"https://open.spotify.com/embed/track/{track['track']['id']}"
                 }
                 for track in tracks['items']

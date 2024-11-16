@@ -1,0 +1,25 @@
+{
+    "song_id": "0kdqcbwei4MDWFEX5f33yG",
+    "features": [
+        {
+            "danceability": 0.853,
+            "energy": 0.822,
+            "key": 6,
+            "loudness": -6.836,
+            "mode": 0,
+            "speechiness": 0.246,
+            "acousticness": 0.0841,
+            "instrumentalness": 0.00985,
+            "liveness": 0.166,
+            "valence": 0.746,
+            "tempo": 157.013,
+            "type": "audio_features",
+            "id": "0kdqcbwei4MDWFEX5f33yG",
+            "uri": "spotify:track:0kdqcbwei4MDWFEX5f33yG",
+            "track_href": "https://api.spotify.com/v1/tracks/0kdqcbwei4MDWFEX5f33yG",
+            "analysis_url": "https://api.spotify.com/v1/audio-analysis/0kdqcbwei4MDWFEX5f33yG",
+            "duration_ms": 168136,
+            "time_signature": 4
+        }
+    ]
+}

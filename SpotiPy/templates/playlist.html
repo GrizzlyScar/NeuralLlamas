@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Spotify Playlist - NPC</title>
+    <!-- Include the Spotify IFrame API -->
+    <script src="https://open.spotify.com/embed-podcast/iframe-api/v1"></script>
     <script>
         // Function to send the current song ID to the server
         function logCurrentSong(songId) {
@@ -24,12 +26,35 @@
             });
         }
 
-        // Play the iframe when the button is clicked
-        function playSong(songId, iframeId) {
-            logCurrentSong(songId);
-            const iframe = document.getElementById(iframeId);
-            iframe.scrollIntoView({ behavior: 'smooth' });
-        }
+        // Spotify IFrame API Ready function
+        window.onSpotifyIframeApiReady = (IFrameAPI) => {
+            const iframes = document.querySelectorAll('.spotify-embed');
+            iframes.forEach((iframe) => {
+                const element = iframe;
+                const options = {
+                    uri: iframe.getAttribute('data-uri'),
+                    songId: iframe.getAttribute('songID')
+                };
+
+                const callback = (EmbedController) => {
+                    // Add event listener for playback updates
+                    EmbedController.addListener('playback_update', (e) => {
+                        if (e.data.isPaused) {
+                            console.log(`Paused song: ${options.uri}`);
+                            // console.log(`Song ID: ${options.songId}`);
+                            logCurrentSong(options.songId);
+                        } else {
+                            console.log(`Playing song: ${options.uri}`);
+                            // console.log(`Song ID: ${options.songId}`);
+                            logCurrentSong(options.songId);
+                        }
+                    });
+                };
+
+                // Create the controller for each iframe
+                IFrameAPI.createController(element, options, callback);
+            });
+        };
     </script>
 </head>
 <body>
@@ -41,7 +66,9 @@
                 <br>
                 <iframe 
                     id="iframe-{{ loop.index }}" 
-                    src="{{ track.embed_url }}" 
+                    src="{{ track.embed_url }}?enable-spotify-embed=true" 
+                    data-uri="spotify:track:{{ track.embed_url.split('/')[-1].split('?')[0] }}"
+                    songID="{{track.songid}}"
                     class="spotify-embed"
                     width="300" 
                     height="80" 
@@ -49,9 +76,6 @@
                     allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture">
                 </iframe>
                 <br>
-                <button onclick="playSong('{{ track.embed_url.split('/')[-1] }}', 'iframe-{{ loop.index }}')">
-                    Play
-                </button>
             </li>
             <br>
         {% endfor %}

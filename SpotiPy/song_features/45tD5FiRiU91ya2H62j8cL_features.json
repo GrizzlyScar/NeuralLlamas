@@ -1,0 +1,25 @@
+{
+    "song_id": "45tD5FiRiU91ya2H62j8cL",
+    "features": [
+        {
+            "danceability": 0.627,
+            "energy": 0.767,
+            "key": 0,
+            "loudness": -6.455,
+            "mode": 0,
+            "speechiness": 0.0475,
+            "acousticness": 0.027,
+            "instrumentalness": 1.55e-06,
+            "liveness": 0.128,
+            "valence": 0.574,
+            "tempo": 128.127,
+            "type": "audio_features",
+            "id": "45tD5FiRiU91ya2H62j8cL",
+            "uri": "spotify:track:45tD5FiRiU91ya2H62j8cL",
+            "track_href": "https://api.spotify.com/v1/tracks/45tD5FiRiU91ya2H62j8cL",
+            "analysis_url": "https://api.spotify.com/v1/audio-analysis/45tD5FiRiU91ya2H62j8cL",
+            "duration_ms": 244307,
+            "time_signature": 4
+        }
+    ]
+}
